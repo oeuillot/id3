@@ -23,6 +23,8 @@
 		var fs = require('fs');
 	}
 
+	var useBuffer = (typeof Buffer !== 'undefined');
+	
 	Reader.prototype.open = function(file, callback) {
 		this.file = file;
 		var self = this;
@@ -197,7 +199,7 @@
 			length += this.byteLength;
 		}
 		var str = '';
-		if(typeof Buffer !== 'undefined') {
+		if(useBuffer) {
 			var data = [];
 			for(var i = offset; i < (offset + length); i++) {
 				data.push(this.getUint8(i));
@@ -218,16 +220,11 @@
 		offset = offset || 0;
 		length = length || (this.byteLength - offset);
 		var littleEndian = false,
-			str = '',
-			useBuffer = false;
-		if(typeof Buffer !== 'undefined') {
-			str = [];
-			useBuffer = true;
-		}
+			str = (useBuffer)?[]:'';
 		if(length < 0) {
 			length += this.byteLength;
 		}
-		if(bom) {
+		if(bom && offset+2<this.byteLength) {
 			var bomInt = this.getUint16(offset);
 			if(bomInt === 0xFFFE) {
 				littleEndian = true;
